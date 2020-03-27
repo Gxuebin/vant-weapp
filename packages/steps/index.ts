@@ -1,7 +1,10 @@
+import { Weapp } from 'definitions/weapp';
 import { VantComponent } from '../common/component';
-import { GREEN } from '../common/color';
+import { GREEN, GRAY_DARK } from '../common/color';
 
 VantComponent({
+  classes: ['desc-class'],
+
   props: {
     icon: String,
     steps: Array,
@@ -13,37 +16,22 @@ VantComponent({
     activeColor: {
       type: String,
       value: GREEN
-    }
-  },
-
-  watch: {
-    steps: 'formatSteps',
-    active: 'formatSteps'
-  },
-
-  created() {
-    this.formatSteps();
+    },
+    inactiveColor: {
+      type: String,
+      value: GRAY_DARK
+    },
+    activeIcon: {
+      type: String,
+      value: 'checked'
+    },
+    inactiveIcon: String
   },
 
   methods: {
-    formatSteps() {
-      const { steps } = this.data;
-      steps.forEach((step, index) => {
-        step.status = this.getStatus(index);
-      });
-      this.setData({ steps });
-    },
-
-    getStatus(index) {
-      const { active } = this.data;
-
-      if (index < active) {
-        return 'finish';
-      } else if (index === active) {
-        return 'process';
-      }
-
-      return '';
+    onClick(event: Weapp.Event) {
+      const { index } = event.currentTarget.dataset;
+      this.$emit('click-step', index);
     }
-  }
+  },
 });

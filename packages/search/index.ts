@@ -1,4 +1,5 @@
 import { VantComponent } from '../common/component';
+import { Weapp } from 'definitions/weapp';
 
 VantComponent({
   field: true,
@@ -6,6 +7,7 @@ VantComponent({
   classes: ['field-class', 'input-class', 'cancel-class'],
 
   props: {
+    label: String,
     focus: Boolean,
     error: Boolean,
     disabled: Boolean,
@@ -13,15 +15,34 @@ VantComponent({
     inputAlign: String,
     showAction: Boolean,
     useActionSlot: Boolean,
+    useLeftIconSlot: Boolean,
+    useRightIconSlot: Boolean,
+    leftIcon: {
+      type: String,
+      value: 'search'
+    },
+    rightIcon: String,
     placeholder: String,
     placeholderStyle: String,
+    actionText: {
+      type: String,
+      value: '取消'
+    },
     background: {
       type: String,
-      value: '#f2f2f2'
+      value: '#ffffff'
     },
     maxlength: {
       type: Number,
       value: -1
+    },
+    shape: {
+      type: String,
+      value: 'square'
+    },
+    clearable: {
+      type: Boolean,
+      value: true
     }
   },
 
@@ -32,9 +53,15 @@ VantComponent({
     },
 
     onCancel() {
-      this.setData({ value: '' });
-      this.$emit('cancel');
-      this.$emit('change', '');
+      /**
+       * 修复修改输入框值时，输入框失焦和赋值同时触发，赋值失效
+       * https://github.com/youzan/@vant/weapp/issues/1768
+       */
+      setTimeout(() => {
+        this.setData({ value: '' });
+        this.$emit('cancel');
+        this.$emit('change', '');
+      }, 200);
     },
 
     onSearch() {

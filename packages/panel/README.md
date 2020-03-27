@@ -1,16 +1,18 @@
-## Panel 面板
+# Panel 面板
 
-### 使用指南
-在 app.json 或 index.json 中引入组件
+### 引入
+
+在`app.json`或`index.json`中引入组件，详细介绍见[快速上手](#/quickstart#yin-ru-zu-jian)
+
 ```json
 "usingComponents": {
-  "van-panel": "path/to/vant-weapp/dist/panel/index"
+  "van-panel": "path/to/@vant/weapp/dist/panel/index"
 }
 ```
 
-### 代码演示
+## 代码演示
 
-#### 基础用法
+### 基础用法
 面板只是一个容器，里面可以放入自定义的内容
 
 ```html
@@ -19,7 +21,7 @@
 </van-panel>
 ```
 
-#### 高级用法
+### 高级用法
 使用`slot`自定义内容
 
 ```html
@@ -32,14 +34,16 @@
 </van-panel>
 ```
 
-### API
+## API
 
-| 参数 | 说明 | 类型 | 默认值 |
-|-----------|-----------|-----------|-------------|
-| title | 标题 | `String` | - |
-| desc | 描述 | `String` | - |
-| status | 状态 | `String` | - |
-| use-footer-slot | 是否使用 footer slot | `Boolean` | `false` |
+### Props
+
+| 参数 | 说明 | 类型 | 默认值 | 版本 |
+|-----------|-----------|-----------|-------------|-------------|
+| title | 标题 | *string* | - | - |
+| desc | 描述 | *string* | - | - |
+| status | 状态 | *string* | - | - |
+| use-footer-slot | 是否使用 footer slot | *boolean* | `false` | - |
 
 ### Slot
 
@@ -56,9 +60,3 @@
 | custom-class | 根节点样式类 |
 | header-class | 头部样式类 |
 | footer-class | 底部样式类 |
-
-### 更新日志
-
-| 版本 | 类型 | 内容 |
-|-----------|-----------|-----------|
-| 0.0.1 | feature | 新增组件 |

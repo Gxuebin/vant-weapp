@@ -1,8 +1,9 @@
 import Page from '../../common/page';
+import Toast from '../../dist/toast/toast';
 
 Page({
   data: {
-    active: 0,
+    active: 1,
     steps: [
       {
         text: '步骤一',
@@ -27,5 +28,9 @@ Page({
     this.setData({
       active: ++this.data.active % 4
     });
-  }
+  },
+
+  onClick(event) {
+    Toast(`Index: ${event.detail}`);
+  },
 });

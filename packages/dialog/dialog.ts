@@ -2,14 +2,29 @@ let queue = [];
 
 type DialogAction = 'confirm' | 'cancel';
 type DialogOptions = {
+  lang?: string;
   show?: boolean;
   title?: string;
+  width?: string | number;
   zIndex?: number;
-  context?: any;
+  context?: WechatMiniprogram.Page.TrivialInstance | WechatMiniprogram.Component.TrivialInstance;
   message?: string;
   overlay?: boolean;
   selector?: string;
+  ariaLabel?: string;
+  className?: string;
+  customStyle?: string;
+  transition?: string;
   asyncClose?: boolean;
+  businessId?: number;
+  sessionFrom?: string;
+  overlayStyle?: string;
+  appParameter?: string;
+  messageAlign?: string;
+  sendMessageImg?: string;
+  showMessageCard?: boolean;
+  sendMessagePath?: string;
+  sendMessageTitle?: string;
   confirmButtonText?: string;
   cancelButtonText?: string;
   showConfirmButton?: boolean;
@@ -37,9 +52,16 @@ function getContext() {
 }
 
 const Dialog: Dialog = options => {
+  options = {
+    ...Dialog.currentOptions,
+    ...options
+  };
+
   return new Promise((resolve, reject) => {
     const context = options.context || getContext();
     const dialog = context.selectComponent(options.selector);
+
+    delete options.context;
     delete options.selector;
 
     if (dialog) {
@@ -58,11 +80,17 @@ const Dialog: Dialog = options => {
 Dialog.defaultOptions = {
   show: true,
   title: '',
+  width: null,
   message: '',
   zIndex: 100,
   overlay: true,
-  asyncClose: false,
   selector: '#van-dialog',
+  className: '',
+  asyncClose: false,
+  transition: 'scale',
+  customStyle: '',
+  messageAlign: '',
+  overlayStyle: '',
   confirmButtonText: '确认',
   cancelButtonText: '取消',
   showConfirmButton: true,
@@ -71,15 +99,10 @@ Dialog.defaultOptions = {
   confirmButtonOpenType: ''
 };
 
-Dialog.alert = options =>
-  Dialog({
-    ...Dialog.currentOptions,
-    ...options
-  });
+Dialog.alert = Dialog;
 
 Dialog.confirm = options =>
   Dialog({
-    ...Dialog.currentOptions,
     showCancelButton: true,
     ...options
   });

@@ -3,17 +3,29 @@ import { button } from '../mixins/button';
 import { openType } from '../mixins/open-type';
 
 VantComponent({
-  classes: ['loading-class'],
-
   mixins: [button, openType],
 
+  classes: ['hover-class', 'loading-class'],
+
+  data: {
+    baseStyle: ''
+  },
+
   props: {
+    icon: String,
     plain: Boolean,
     block: Boolean,
     round: Boolean,
     square: Boolean,
     loading: Boolean,
+    hairline: Boolean,
     disabled: Boolean,
+    loadingText: String,
+    customStyle: String,
+    loadingType: {
+      type: String,
+      value: 'circular'
+    },
     type: {
       type: String,
       value: 'default'
@@ -21,29 +33,46 @@ VantComponent({
     size: {
       type: String,
       value: 'normal'
-    }
-  },
+    },
+    loadingSize: {
+      type: String,
+      value: '20px'
+    },
+    color: {
+      type: String,
+      observer(color: string) {
+        let style = '';
 
-  computed: {
-    classes(): string {
-      const { type, size, block, plain, round, square, loading, disabled } = this.data;
-      return this.classNames('van-button', `van-button--${type}`, `van-button--${size}`, {
-        'van-button--block': block,
-        'van-button--round': round,
-        'van-button--plain': plain,
-        'van-button--square': square,
-        'van-button--loading': loading,
-        'van-button--disabled': disabled,
-        'van-button--unclickable': disabled || loading
-      });
+        if (color) {
+          style += `color: ${this.data.plain ? color : 'white'};`;
+
+          if (!this.data.plain) {
+            // Use background instead of backgroundColor to make linear-gradient work
+            style += `background: ${color};`;
+          }
+
+          // hide border when color is linear-gradient
+          if (color.indexOf('gradient') !== -1) {
+            style += 'border: 0;';
+          } else {
+            style += `border-color: ${color};`;
+          }
+        }
+
+        if (style !== this.data.baseStyle) {
+          this.setData({ baseStyle: style });
+        }
+      }
     }
   },
 
   methods: {
     onClick() {
-      if (!this.data.disabled && !this.data.loading) {
+      if (!this.data.loading) {
         this.$emit('click');
       }
-    }
+    },
+
+    noop() {}
   }
 });

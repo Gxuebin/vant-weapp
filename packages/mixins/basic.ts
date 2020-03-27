@@ -1,14 +1,16 @@
-import { classNames } from '../common/class-names';
-
 export const basic = Behavior({
   methods: {
-    classNames,
-
-    $emit() {
-      this.triggerEvent.apply(this, arguments);
+    $emit(...args) {
+      this.triggerEvent(...args);
     },
 
-    getRect(selector, all) {
+    set(data: object, callback: Function) {
+      this.setData(data, callback);
+
+      return new Promise(resolve => wx.nextTick(resolve));
+    },
+
+    getRect(selector: string, all: boolean) {
       return new Promise(resolve => {
         wx.createSelectorQuery()
           .in(this)[all ? 'selectAll' : 'select'](selector)

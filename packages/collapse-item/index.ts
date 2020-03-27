@@ -1,23 +1,24 @@
 import { VantComponent } from '../common/component';
 
+const nextTick = () => new Promise(resolve => setTimeout(resolve, 20));
+
 VantComponent({
-  classes: ['content-class'],
+  classes: ['title-class', 'content-class'],
 
   relation: {
     name: 'collapse',
     type: 'ancestor',
-    linked(parent: Weapp.Component) {
-      this.parent = parent;
-    }
+    current: 'collapse-item',
   },
 
   props: {
-    name: [String, Number],
+    name: null,
+    title: null,
+    value: null,
     icon: String,
     label: String,
-    title: [String, Number],
-    value: [String, Number],
     disabled: Boolean,
+    clickable: Boolean,
     border: {
       type: Boolean,
       value: true
@@ -30,54 +31,66 @@ VantComponent({
 
   data: {
     contentHeight: 0,
-    expanded: false
+    expanded: false,
+    transition: false
   },
 
-  computed: {
-    titleClass() {
-      const { disabled, expanded } = this.data;
-      return this.classNames('van-collapse-item__title', {
-        'van-collapse-item__title--disabled': disabled,
-        'van-collapse-item__title--expanded': expanded
+  mounted() {
+    this.updateExpanded()
+      .then(nextTick)
+      .then(() => {
+        const data: Record<string, boolean | string> = { transition: true };
+
+        if (this.data.expanded) {
+          data.contentHeight = 'auto';
+        }
+
+        this.setData(data);
       });
-    }
   },
 
   methods: {
     updateExpanded() {
       if (!this.parent) {
-        return null;
+        return Promise.resolve();
       }
 
-      const { value, accordion, items } = this.parent.data;
+      const { value, accordion } = this.parent.data;
+      const { children = [] } = this.parent;
       const { name } = this.data;
 
-      const index = items.indexOf(this);
+      const index = children.indexOf(this);
       const currentName = name == null ? index : name;
 
       const expanded = accordion
         ? value === currentName
-        : value.some(name => name === currentName);
+        : (value || []).some((name: string | number) => name === currentName);
+
+      const stack = [];
 
       if (expanded !== this.data.expanded) {
-        this.updateStyle(expanded);
+        stack.push(this.updateStyle(expanded));
       }
 
-      this.setData({ expanded });
+      stack.push(this.set({ index, expanded }));
+
+      return Promise.all(stack);
     },
 
-    updateStyle(expanded) {
-      if (expanded) {
-        this.getRect('.van-collapse-item__content').then(res => {
-          this.setData({
-            contentHeight: res.height ? res.height + 'px' : null
-          });
+    updateStyle(expanded: boolean) {
+      return this.getRect('.van-collapse-item__content')
+        .then((rect: WechatMiniprogram.BoundingClientRectCallbackResult) => rect.height)
+        .then((height: number) => {
+          if (expanded) {
+            return this.set({
+              contentHeight: height ? `${height}px` : 'auto'
+            });
+          }
+
+          return this.set({ contentHeight: `${height}px` })
+            .then(nextTick)
+            .then(() => this.set({ contentHeight: 0 }));
         });
-      } else {
-        this.setData({
-          contentHeight: 0
-        });
-      }
     },
 
     onClick() {
@@ -86,11 +99,18 @@ VantComponent({
       }
 
       const { name, expanded } = this.data;
-
-      const index = this.parent.data.items.indexOf(this);
+      const index = this.parent.children.indexOf(this);
       const currentName = name == null ? index : name;
 
       this.parent.switch(currentName, !expanded);
+    },
+
+    onTransitionEnd() {
+      if (this.data.expanded) {
+        this.setData({
+          contentHeight: 'auto'
+        });
+      }
     }
   }
 });

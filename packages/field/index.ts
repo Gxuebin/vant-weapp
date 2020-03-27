@@ -1,11 +1,13 @@
 import { VantComponent } from '../common/component';
+import { Weapp } from 'definitions/weapp';
 
 VantComponent({
   field: true,
 
-  classes: ['input-class'],
+  classes: ['input-class', 'right-icon-class'],
 
   props: {
+    size: String,
     icon: String,
     label: String,
     error: Boolean,
@@ -14,22 +16,38 @@ VantComponent({
     center: Boolean,
     isLink: Boolean,
     leftIcon: String,
+    rightIcon: String,
     disabled: Boolean,
-    autosize: Boolean,
+    autosize: [Boolean, Object],
     readonly: Boolean,
     required: Boolean,
+    password: Boolean,
     iconClass: String,
     clearable: Boolean,
+    clickable: Boolean,
     inputAlign: String,
-    customClass: String,
-    confirmType: String,
-    confirmHold: Boolean,
-    errorMessage: String,
     placeholder: String,
     customStyle: String,
-    useIconSlot: Boolean,
-    useButtonSlot: Boolean,
+    confirmType: String,
+    confirmHold: Boolean,
+    holdKeyboard: Boolean,
+    errorMessage: String,
+    arrowDirection: String,
+    showWordLimit: Boolean,
     placeholderStyle: String,
+    errorMessageAlign: String,
+    selectionEnd: {
+      type: Number,
+      value: -1
+    },
+    selectionStart: {
+      type: Number,
+      value: -1
+    },
+    showConfirmBar: {
+      type: Boolean,
+      value: true
+    },
     adjustPosition: {
       type: Boolean,
       value: true
@@ -57,80 +75,52 @@ VantComponent({
   },
 
   data: {
-    showClear: false
-  },
-
-  computed: {
-    inputClass(): string {
-      const { data } = this;
-      return this.classNames('input-class', 'van-field__input', {
-        'van-field--error': data.error,
-        'van-field__textarea': data.type === 'textarea',
-        'van-field__input--disabled': data.disabled,
-        [`van-field__input--${data.inputAlign}`]: data.inputAlign
-      });
-    }
-  },
-
-  beforeCreate() {
-    this.focused = false;
+    focused: false,
   },
 
   methods: {
     onInput(event: Weapp.Event) {
       const { value = '' } = event.detail || {};
 
-      this.setData({
-        value,
-        showClear: this.getShowClear(value)
-      }, () => {
-        this.$emit('input', value);
-        this.$emit('change', value);
+      this.setData({ value });
+
+      wx.nextTick(() => {
+        this.emitChange(value);
       });
     },
 
     onFocus(event: Weapp.Event) {
-      const { value = '', height = 0 } = event.detail || {};
-      this.$emit('focus', { value, height });
-      this.focused = true;
-      this.setData({
-        showClear: this.getShowClear()
-      });
+      this.setData({ focused: true });
+      this.$emit('focus', event.detail);
     },
 
     onBlur(event: Weapp.Event) {
-      const { value = '', cursor = 0 } = event.detail || {};
-      this.$emit('blur', { value, cursor });
-      this.focused = false;
-      this.setData({
-        showClear: this.getShowClear()
-      });
+      this.setData({ focused: false });
+      this.$emit('blur', event.detail);
     },
 
     onClickIcon() {
       this.$emit('click-icon');
     },
 
-    getShowClear(value?: string): boolean {
-      value = value === undefined ? this.data.value : value;
-      return (
-        this.data.clearable && this.focused && value && !this.data.readonly
-      );
-    },
-
     onClear() {
-      this.setData({
-        value: '',
-        showClear: this.getShowClear('')
-      }, () => {
-        this.$emit('input', '');
-        this.$emit('change', '');
+      this.setData({ value: '' });
+
+      wx.nextTick(() => {
+        this.emitChange('');
         this.$emit('clear', '');
       });
     },
 
     onConfirm() {
       this.$emit('confirm', this.data.value);
-    }
+    },
+
+    emitChange(value) {
+      this.$emit('input', value);
+      this.$emit('change', value);
+    },
+
+    noop() {}
   }
 });

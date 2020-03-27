@@ -1,15 +1,24 @@
 import { VantComponent } from '../common/component';
+import { Weapp } from 'definitions/weapp';
 
 VantComponent({
   field: true,
 
+  classes: ['icon-class'],
+
   props: {
+    value: {
+      type: Number,
+      observer(value: number) {
+        if (value !== this.data.innerValue) {
+          this.setData({ innerValue: value });
+        }
+      }
+    },
     readonly: Boolean,
     disabled: Boolean,
-    size: {
-      type: Number,
-      value: 20
-    },
+    allowHalf: Boolean,
+    size: null,
     icon: {
       type: String,
       value: 'star'
@@ -32,62 +41,53 @@ VantComponent({
     },
     count: {
       type: Number,
-      value: 5
+      value: 5,
+      observer(value: number) {
+        this.setData({ innerCountArray: Array.from({ length: value }) });
+      },
     },
-    value: {
-      type: Number,
-      value: 0
+    gutter: null,
+    touchable: {
+      type: Boolean,
+      value: true
     }
   },
 
   data: {
-    innerValue: 0
-  },
-
-  watch: {
-    value(value) {
-      if (value !== this.data.innerValue) {
-        this.setData({ innerValue: value });
-      }
-    }
-  },
-
-  computed: {
-    list() {
-      const { count, innerValue } = this.data;
-      return Array.from({ length: count }, (_, index) => index < innerValue);
-    }
+    innerValue: 0,
+    innerCountArray: Array.from({ length: 5 }),
   },
 
   methods: {
     onSelect(event: Weapp.Event) {
       const { data } = this;
-      const { index } = event.currentTarget.dataset;
+      const { score } = event.currentTarget.dataset;
       if (!data.disabled && !data.readonly) {
-        this.setData({ innerValue: index + 1 });
-        this.$emit('input', index + 1);
-        this.$emit('change', index + 1);
+        this.setData({ innerValue: score + 1 });
+        this.$emit('input', score + 1);
+        this.$emit('change', score + 1);
       }
     },
 
     onTouchMove(event: Weapp.TouchEvent) {
-      const { clientX, clientY } = event.touches[0];
+      const { touchable } = this.data;
+      if (!touchable) return;
 
-      this.getRect('.van-rate__item', true).then(list => {
-        const target = list.find(
-          item =>
-            clientX >= item.left &&
-            clientX <= item.right &&
-            clientY >= item.top &&
-            clientY <= item.bottom
-        );
-        if (target != null) {
-          this.onSelect({
-            ...event,
-            currentTarget: target
-          });
+      const { clientX } = event.touches[0];
+
+      this.getRect('.van-rate__icon', true).then(
+        (list: WechatMiniprogram.BoundingClientRectCallbackResult[]) => {
+          const target = list
+            .sort(item => item.right - item.left)
+            .find(item => clientX >= item.left && clientX <= item.right);
+          if (target != null) {
+            this.onSelect({
+              ...event,
+              currentTarget: target
+            });
+          }
         }
-      });
+      );
     }
   }
 });

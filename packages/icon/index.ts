@@ -1,22 +1,23 @@
-import { isSrc } from '../common/utils';
 import { VantComponent } from '../common/component';
 
 VantComponent({
   props: {
+    dot: Boolean,
     info: null,
-    name: String,
-    size: String,
+    size: null,
     color: String,
     customStyle: String,
     classPrefix: {
       type: String,
       value: 'van-icon'
-    }
-  },
-
-  computed: {
-    isSrc() {
-      return isSrc(this.data.name);
+    },
+    name: {
+      type: String,
+      observer(val) {
+        this.setData({
+          isImageName: val.indexOf('/') !== -1
+        });
+      }
     }
   },
 

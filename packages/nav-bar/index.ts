@@ -5,7 +5,14 @@ VantComponent({
 
   props: {
     title: String,
-    fixed: Boolean,
+    fixed: {
+      type: Boolean,
+      observer: 'setHeight'
+    },
+    placeholder: {
+      type: Boolean,
+      observer: 'setHeight'
+    },
     leftText: String,
     rightText: String,
     leftArrow: Boolean,
@@ -16,7 +23,28 @@ VantComponent({
     zIndex: {
       type: Number,
       value: 1
+    },
+    safeAreaInsetTop: {
+      type: Boolean,
+      value: true
     }
+  },
+
+  data: {
+    statusBarHeight: 0,
+    height: 44
+  },
+
+  created() {
+    const { statusBarHeight } = wx.getSystemInfoSync();
+    this.setData({
+      statusBarHeight,
+      height: 44 + statusBarHeight
+    });
+  },
+
+  mounted() {
+    this.setHeight();
   },
 
   methods: {
@@ -26,6 +54,20 @@ VantComponent({
 
     onClickRight() {
       this.$emit('click-right');
+    },
+
+    setHeight() {
+      if (!this.data.fixed || !this.data.placeholder) {
+        return;
+      }
+
+      wx.nextTick(() => {
+        this.getRect('.van-nav-bar').then(
+          (res: WechatMiniprogram.BoundingClientRectCallbackResult) => {
+            this.setData({ height: res.height });
+          }
+        );
+      });
     }
   }
 });
